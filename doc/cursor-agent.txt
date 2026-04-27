@@ -29,7 +29,8 @@ Use Lua to configure in your init.lua:
 
 NOTES                                             *cursor-agent-notes*
 
-- The plugin uses a floating terminal to render Cursor Agent's native UI. The
+- The :CursorAgent command uses a side terminal to render Cursor Agent's native
+  UI. Selection and buffer commands use floating terminals.
 - terminal starts in the project root (detected via markers like `.git`).
 - Configure `cmd` to point to your Cursor Agent CLI. If the executable is
   missing, an error is shown.

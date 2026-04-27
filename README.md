@@ -1,6 +1,6 @@
 ## Cursor Agent Neovim Plugin 
 
-A minimal Neovim plugin to run the Cursor Agent CLI inside a centered floating terminal. Toggle an interactive terminal at your project root, or send the current buffer or a visual selection to Cursor Agent.
+A minimal Neovim plugin to run the Cursor Agent CLI in Neovim. Toggle an interactive side terminal at your project root, or send the current buffer or a visual selection to Cursor Agent.
 
 ### Requirements
 - **Cursor Agent CLI**: `cursor-agent` available on your `$PATH`
@@ -12,9 +12,9 @@ A minimal Neovim plugin to run the Cursor Agent CLI inside a centered floating t
 {
   "xTacobaco/cursor-agent.nvim",
   config = function()
-    vim.keymap.set("n", "<leader>ca", ":CursorAgent<CR>", { desc = "Cursor Agent: Toggle terminal" })
-    vim.keymap.set("v", "<leader>ca", ":CursorAgentSelection<CR>", { desc = "Cursor Agent: Send selection" })
-    vim.keymap.set("n", "<leader>cA", ":CursorAgentBuffer<CR>", { desc = "Cursor Agent: Send buffer" })
+    vim.keymap.set("n", "<C-c>", ":CursorAgent<CR>", { desc = "Cursor Agent: Toggle terminal" })
+    vim.keymap.set("v", "<C-p>", ":CursorAgentSelection<CR>", { desc = "Cursor Agent: Send selection" })
+    vim.keymap.set("n", "<C-b>", ":CursorAgentBuffer<CR>", { desc = "Cursor Agent: Send buffer" })
   end,
 }
 ```
@@ -42,12 +42,10 @@ Note: The plugin auto-initializes with defaults on load (via `after/plugin/curso
 
 ## Quickstart
 
-- Run `:CursorAgent` to toggle an interactive floating terminal in your project root. Type directly into the `cursor-agent` program.
+- Run `:CursorAgent` to toggle an interactive side terminal in your project root. Type directly into the `cursor-agent` program.
 - Visually select code, then use `:CursorAgentSelection` to ask about just that selection.
 - Run `:CursorAgentBuffer` to send the entire current buffer (handy for files like `cursor.md`).
-- Press `q` in normal mode in the floating terminal to close it or run :CursorAgent `<leader>ca` to toggle it away.
-
-All interactions happen in a centered floating terminal.
+- Press `q` in normal mode in the side terminal to close it or run :CursorAgent again to toggle it away.
 
 ## Commands
 
@@ -65,8 +63,27 @@ require("cursor-agent").setup({
   keymaps = {
     toggle = {
       mode = "n",
-      lhs = "<leader>c",
+      lhs = "<C-c>",
       desc = "Cursor Agent: Toggle terminal",
+    },
+    selection = {
+      mode = "v",
+      lhs = "<C-p>",
+      desc = "Cursor Agent: Send selection",
+    },
+    buffer = {
+      mode = "n",
+      lhs = "<C-b>",
+      desc = "Cursor Agent: Send buffer",
+    },
+  },
+  cursor_window_keys = {
+    terminal_mode = {
+      help = { "??", "<F1>" },
+      toggle_width = { "<C-f>" },
+    },
+    normal_mode = {
+      hide = { "<Esc>", "q" },
     },
   },
 })
@@ -104,27 +121,45 @@ require("cursor-agent").setup({
 })
 ```
 
+- Customize terminal window mappings:
+```lua
+require("cursor-agent").setup({
+  cursor_window_keys = {
+    terminal_mode = {
+      help = { "??", "<F1>" },
+      toggle_width = { "<C-f>" },
+      hide = { "<Esc>" },
+    },
+    normal_mode = {
+      hide = { "q" },
+    },
+  },
+})
+```
+
+`<F1>` must be written with angle brackets. Writing `F1` without brackets will not map correctly.
+
 ## Suggested keymaps
 
 ```lua
 -- Toggle the interactive terminal
-vim.keymap.set("n", "<leader>ca", ":CursorAgent<CR>", { desc = "Cursor Agent: Toggle terminal" })
+vim.keymap.set("n", "<C-c>", ":CursorAgent<CR>", { desc = "Cursor Agent: Toggle terminal" })
 
 -- Ask about the visual selection
-vim.keymap.set("v", "<leader>ca", ":CursorAgentSelection<CR>", { desc = "Cursor Agent: Send selection" })
+vim.keymap.set("v", "<C-p>", ":CursorAgentSelection<CR>", { desc = "Cursor Agent: Send selection" })
 
 -- Ask about the current buffer
-vim.keymap.set("n", "<leader>cA", ":CursorAgentBuffer<CR>", { desc = "Cursor Agent: Send buffer" })
+vim.keymap.set("n", "<C-b>", ":CursorAgentBuffer<CR>", { desc = "Cursor Agent: Send buffer" })
 ```
 
 ## Programmatic usage
 
 You can call the API directly if you prefer:
 ```lua
--- Launch a one-off run passing a prompt as argv (opens a floating terminal)
+-- Launch a one-off run passing a prompt as argv (opens a side terminal)
 require("cursor-agent").ask({ prompt = "How can I refactor this function?" })
 ```
-This opens a floating terminal using `termopen`, with the working directory set to the detected project root.
+This opens a side terminal using `termopen`, with the working directory set to the detected project root.
 
 ## Troubleshooting
 
@@ -134,7 +169,7 @@ This opens a floating terminal using `termopen`, with the working directory set 
 
 ## How it works
 
-- A floating terminal is created with `termopen`, centered, wrapped, and ready for immediate input.
+- A side terminal is created with `termopen`, wrapped, and ready for immediate input.
 - The terminal starts in the detected project root so Cursor Agent has the right context.
 - For selection/buffer commands, the text is written to a temporary file and its path is passed to the CLI as a positional argument.
 

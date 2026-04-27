@@ -17,8 +17,27 @@ local default_config = {
   keymaps = {
     toggle = {
       mode = "n",
-      lhs = "<leader>c",
+      lhs = "<A-c>",
       desc = "Cursor Agent: Toggle terminal",
+    },
+    selection = {
+      mode = "v",
+      lhs = "<A-p>",
+      desc = "Cursor Agent: Send selection",
+    },
+    buffer = {
+      mode = "n",
+      lhs = "<A-b>",
+      desc = "Cursor Agent: Send buffer",
+    },
+  },
+  cursor_window_keys = {
+    terminal_mode = {
+      help = { "??", "<F1>" },
+      toggle_width = { "<C-f>" },
+    },
+    normal_mode = {
+      hide = { "q" },
     },
   },
 }

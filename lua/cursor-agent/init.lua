@@ -67,12 +67,10 @@ function M.ask(opts)
   end
 
   local root = util.get_project_root()
-  termui.open_float_term({
+  termui.open_side_term({
     argv = argv,
     title = title,
-    border = 'rounded',
-    width = 0.6,
-    height = 0.6,
+    width = 0.4,
     cwd = root,
     on_exit = function(code)
       if code ~= 0 then
@@ -104,11 +102,9 @@ function M.toggle_terminal()
 
   -- If we have a valid buffer with a live job, just reopen a window for it
   if st.bufnr and vim.api.nvim_buf_is_valid(st.bufnr) and job_is_alive(st.job_id) then
-    st.win = termui.open_float_win_for_buf(st.bufnr, {
+    st.win = termui.open_side_win_for_buf(st.bufnr, {
       title = 'Cursor Agent',
-      border = 'rounded',
-      width = 0.6,
-      height = 0.6,
+      width = 0.4,
     })
     return st.bufnr, st.win
   end
@@ -117,12 +113,10 @@ function M.toggle_terminal()
   local cfg = config.get()
   local argv = util.concat_argv(util.to_argv(cfg.cmd), cfg.args)
   local root = util.get_project_root()
-  local bufnr, win, job_id = termui.open_float_term({
+  local bufnr, win, job_id = termui.open_side_term({
     argv = argv,
     title = 'Cursor Agent',
-    border = 'rounded',
-    width = 0.6,
-    height = 0.6,
+    width = 0.4,
     cwd = root,
     on_exit = function(code)
       -- Clear stored job id when it exits
@@ -137,29 +131,37 @@ function M.toggle_terminal()
 end
 
 function M._ensure_keymaps()
-  -- Default mapping: configurable via setup({ keymaps = { toggle = ... } })
-  if not vim.g.cursor_agent_mapped then
-    local cfg = config.get()
-    local toggle = cfg.keymaps and cfg.keymaps.toggle
-    if toggle ~= false then
-      local mode = 'n'
-      local lhs = nil
-      local desc = 'Cursor Agent: Toggle terminal'
-      if type(toggle) == 'string' then
-        lhs = toggle
-      elseif type(toggle) == 'table' then
-        mode = toggle.mode or mode
-        lhs = toggle.lhs
-        desc = toggle.desc or desc
-      end
-      if type(lhs) == 'string' and lhs ~= '' then
-        vim.keymap.set(mode, lhs, function()
-          require('cursor-agent').toggle_terminal()
-        end, { desc = desc })
-        vim.g.cursor_agent_mapped = true
-      end
+  if vim.g.cursor_agent_mapped then return end
+
+  local cfg = config.get()
+  local keymaps = cfg.keymaps or {}
+
+  local function set_map(map_cfg, default_mode, default_desc, rhs)
+    if map_cfg == false then return end
+    local mode = default_mode
+    local lhs
+    local desc = default_desc
+
+    if type(map_cfg) == 'string' then
+      lhs = map_cfg
+    elseif type(map_cfg) == 'table' then
+      mode = map_cfg.mode or mode
+      lhs = map_cfg.lhs
+      desc = map_cfg.desc or desc
+    end
+
+    if type(lhs) == 'string' and lhs ~= '' then
+      vim.keymap.set(mode, lhs, rhs, { desc = desc })
     end
   end
+
+  set_map(keymaps.toggle, 'n', 'Cursor Agent: Toggle terminal', function()
+    require('cursor-agent').toggle_terminal()
+  end)
+  set_map(keymaps.selection, 'v', 'Cursor Agent: Send selection', '<cmd>CursorAgentSelection<CR>')
+  set_map(keymaps.buffer, 'n', 'Cursor Agent: Send buffer', '<cmd>CursorAgentBuffer<CR>')
+
+  vim.g.cursor_agent_mapped = true
 end
 
 return M
