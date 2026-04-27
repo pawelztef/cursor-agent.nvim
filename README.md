@@ -60,10 +60,15 @@ All interactions happen in a centered floating terminal.
 Only set what you need. For typical usage, `cmd` and `args` are enough.
 ```lua
 require("cursor-agent").setup({
-  -- Executable or argv table. Example: "cursor-agent" or {"/usr/local/bin/cursor-agent"}
   cmd = "cursor-agent",
-  -- Additional arguments always passed to the CLI
   args = {},
+  keymaps = {
+    toggle = {
+      mode = "n",
+      lhs = "<leader>c",
+      desc = "Cursor Agent: Toggle terminal",
+    },
+  },
 })
 ```
 
@@ -81,11 +86,22 @@ require("cursor-agent").setup({
 })
 ```
 
+Set `toggle = false` to disable the default mapping and define your own.
+
 ### Examples
 
 - Use an absolute path for the CLI:
 ```lua
 require("cursor-agent").setup({ cmd = "/usr/local/bin/cursor-agent" })
+```
+
+- Change the toggle mapping:
+```lua
+require("cursor-agent").setup({
+  keymaps = {
+    toggle = { lhs = "<leader>c" },
+  },
+})
 ```
 
 ## Suggested keymaps

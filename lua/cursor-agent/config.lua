@@ -13,6 +13,14 @@ local default_config = {
   timeout_ms = 60000,
   -- Auto-scroll output buffer to the end as new content arrives
   auto_scroll = true,
+  -- Default mappings provided by the plugin
+  keymaps = {
+    toggle = {
+      mode = "n",
+      lhs = "<leader>c",
+      desc = "Cursor Agent: Toggle terminal",
+    },
+  },
 }
 
 local active_config = vim.deepcopy(default_config)

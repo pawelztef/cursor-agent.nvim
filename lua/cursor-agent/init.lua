@@ -137,12 +137,28 @@ function M.toggle_terminal()
 end
 
 function M._ensure_keymaps()
-  -- Default mapping: <leader>ca toggles the floating terminal
+  -- Default mapping: configurable via setup({ keymaps = { toggle = ... } })
   if not vim.g.cursor_agent_mapped then
-    vim.keymap.set('n', '<leader>ca', function()
-      require('cursor-agent').toggle_terminal()
-    end, { desc = 'Cursor Agent: Toggle terminal' })
-    vim.g.cursor_agent_mapped = true
+    local cfg = config.get()
+    local toggle = cfg.keymaps and cfg.keymaps.toggle
+    if toggle ~= false then
+      local mode = 'n'
+      local lhs = nil
+      local desc = 'Cursor Agent: Toggle terminal'
+      if type(toggle) == 'string' then
+        lhs = toggle
+      elseif type(toggle) == 'table' then
+        mode = toggle.mode or mode
+        lhs = toggle.lhs
+        desc = toggle.desc or desc
+      end
+      if type(lhs) == 'string' and lhs ~= '' then
+        vim.keymap.set(mode, lhs, function()
+          require('cursor-agent').toggle_terminal()
+        end, { desc = desc })
+        vim.g.cursor_agent_mapped = true
+      end
+    end
   end
 end
 
